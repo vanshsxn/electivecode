@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sentiment Dashboard</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <h2>Sentiment Overview</h2>
+    <div id="chart"></div>
+    <script>
+        fetch("/api/sentiment_results")
+          .then(response => response.json())
+          .then(data => {
+            let counts = {Positive:0, Negative:0, Neutral:0, Mixed:0};
+            data.forEach(d => { counts[d.sentiment] = (counts[d.sentiment] || 0) + 1; });
+
+            const width = 400, height = 300;
+            const svg = d3.select("#chart")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            const sentiments = Object.keys(counts);
+            svg.selectAll("rect")
+                .data(sentiments)
+                .enter()
+                .append("rect")
+                .attr("x", (d, i) => i * 80)
+                .attr("y", d => height - counts[d] * 20)
+                .attr("width", 60)
+                .attr("height", d => counts[d] * 20)
+                .attr("fill", "teal");
+
+            svg.selectAll("text")
+                .data(sentiments)
+                .enter()
+                .append("text")
+                .attr("x", (d, i) => i * 80 + 30)
+                .attr("y", height - 10)
+                .attr("text-anchor", "middle")
+                .text(d => d);
+          });
+    </script>
+</body>
+</html>
